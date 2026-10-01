@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Journal">
+<meta name="theme-color" content="#0e6b62">
+<title>Trading Journal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#eef1f4;--card:#fff;--ink:#17202b;--mute:#5f6b7a;--line:#d5dbe2;--acc:#0e6b62;--acc-ink:#fff;--gain:#1a7a48;--loss:#b3363a;--warn:#a86a00;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10161d;--card:#18212b;--ink:#e6ebf0;--mute:#93a0af;--line:#2a3542;--acc:#3fc0b0;--acc-ink:#06201c;--gain:#4cc98a;--loss:#f0777b;--warn:#e0a53c}}
+:root[data-theme="dark"]{--bg:#10161d;--card:#18212b;--ink:#e6ebf0;--mute:#93a0af;--line:#2a3542;--acc:#3fc0b0;--acc-ink:#06201c;--gain:#4cc98a;--loss:#f0777b;--warn:#e0a53c}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px 14px 60px}
+h1{font-size:22px;margin:4px 0 2px;letter-spacing:-.01em}
+h2{font-size:16px;margin:0 0 10px}
+.sub{color:var(--mute);margin:0 0 14px;font-size:14px}
+.num{font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-size:20px;font-weight:600}
+.stat span{font-size:12.5px;color:var(--mute)}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0 2px}
+.bar i{display:block;height:100%;background:var(--acc);min-width:2px}
+.goal{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:13px;color:var(--mute)}
+nav{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px}
+nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--mute);font:inherit;font-weight:600;padding:9px 12px;cursor:pointer}
+nav button[aria-selected="true"]{color:var(--ink);border-color:var(--acc)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 3px}
+input,textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{min-height:62px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.row{grid-template-columns:1fr}}
+.checks{display:grid;gap:4px;margin-top:4px}
+.checks label{display:flex;gap:8px;align-items:center;font-weight:400;margin:0;padding:3px 0}
+.checks input{width:auto}
+button.btn{background:var(--acc);color:var(--acc-ink);border:0;border-radius:8px;font:inherit;font-weight:600;padding:9px 14px;cursor:pointer;margin-top:12px}
+button.ghost{background:none;color:var(--mute);border:1px solid var(--line);border-radius:8px;font:inherit;padding:5px 10px;cursor:pointer;font-size:13px}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.item{border-top:1px solid var(--line);padding:12px 0}
+.item:first-child{border-top:0;padding-top:0}
+.head{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.head strong{font-size:16px}
+.tag{font-size:12px;padding:1px 8px;border-radius:20px;border:1px solid var(--line);color:var(--mute)}
+.gain{color:var(--gain);font-weight:600}.loss{color:var(--loss);font-weight:600}
+.meta{color:var(--mute);font-size:13px}
+.item p{margin:4px 0}
+.actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.empty{color:var(--mute);text-align:center;padding:18px 0}
+.foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:6px 8px;border-top:1px solid var(--line)}th{font-weight:600;color:var(--mute);border-top:0}
+button[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+</style>
+</head>
+<body>
+<main>
+<h1>Trading Journal</h1>
+<p class="sub">Write it before you buy. Grade the process, not the result.</p>
+<div id="stats"></div>
+<nav role="tablist" id="tabs"></nav>
+<div id="view"></div>
+<div class="foot">
+  <button class="ghost" id="exp">Export backup</button>
+  <button class="ghost" id="imp">Import backup</button>
+  <button class="ghost" id="theme">Switch theme</button>
+</div>
+<p class="meta">Your entries are saved in this browser only. Export a backup now and then, because clearing browser data erases them.</p>
+</main>
+<script>
+var MIST=["FOMO entry","Sold too early","Held too long","No exit plan","Oversized","Skipped vetting"],KEY="tj-v1",CHECKS=["Liquidity looks healthy","Top holders aren't concentrated","Dev and bundled wallets hold little","Mint and freeze authority revoked","Clear narrative and I'm early"];
+var S={start:40,goal:100000,trades:[],missed:[],notes:[]},tab="trades";
+try{var r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function money(n){return(n<0?"-":"")+"$"+Math.abs(n).toLocaleString(undefined,{maximumFractionDigits:2})}
+function today(){return new Date().toLocaleDateString()}
+function closed(){return S.trades.filter(function(t){return t.status==="closed"})}
+function balance(){return S.start+closed().reduce(function(a,t){return a+t.pnl},0)}
+function stats(){
+  var c=closed(),w=c.filter(function(t){return t.pnl>0}).length,f=c.filter(function(t){return t.followed}).length,b=balance();
+  var open=S.trades.filter(function(t){return t.status==="open"}).length;
+  var wl=c.filter(function(t){return t.pnl>0}),ll=c.filter(function(t){return t.pnl<0});
+  var aw=wl.length?wl.reduce(function(a,t){return a+t.pnl},0)/wl.length:0,al=ll.length?ll.reduce(function(a,t){return a+t.pnl},0)/ll.length:0;
+  var gb=c.reduce(function(a,t){return a+(t.peak!=null&&t.peak-t.size>t.pnl?t.peak-t.size-t.pnl:0)},0);
+  var mk={};c.forEach(function(t){(t.mistakes||[]).forEach(function(m){mk[m]=(mk[m]||0)+1})});
+  var top=Object.keys(mk).sort(function(a,b){return mk[b]-mk[a]})[0];
+  var pct=Math.max(0,Math.min(100,Math.log(Math.max(b,1)/Math.max(S.start,1))/Math.log(S.goal/Math.max(S.start,1))*100));
+  $("stats").innerHTML='<div class="stats">'+
+   '<div class="stat"><b class="num">'+money(b)+'</b><span>Balance (started '+money(S.start)+')</span></div>'+
+   '<div class="stat"><b class="num">'+(c.length?Math.round(w/c.length*100)+"%":"–")+'</b><span>Win rate ('+c.length+' closed)</span></div>'+
+   '<div class="stat"><b class="num">'+(c.length?Math.round(f/c.length*100)+"%":"–")+'</b><span>Followed my plan</span></div>'+
+   '<div class="stat"><b class="num">'+open+'</b><span>Open trades</span></div>'+
+   '<div class="stat"><b class="num" style="font-size:17px"><span class="gain" style="font-size:17px">+'+money(aw)+'</span> / <span class="loss" style="font-size:17px">'+money(al)+'</span></b><span>Avg win vs avg loss'+(wl.length&&ll.length&&aw<Math.abs(al)?' (losses are bigger)':'')+'</span></div>'+
+   '<div class="stat"><b class="num loss">'+money(gb)+'</b><span>Profit given back after peaking</span></div>'+
+   '<div class="stat"><b style="font-size:16px">'+(top?esc(top)+' ('+mk[top]+'x)':'–')+'</b><span>Most common mistake</span></div></div>'+
+   '<div class="goal">Progress to '+money(S.goal)+' (measured in doublings, since that is how it grows)<div class="bar"><i style="width:'+pct.toFixed(1)+'%"></i></div>'+pct.toFixed(1)+'% of the way</div>';
+}
+function tabs(){
+  var t=[["trades","Trades"],["missed","Missed plays"],["review","Review"],["notes","Notes"]];
+  $("tabs").innerHTML=t.map(function(x){return'<button role="tab" data-t="'+x[0]+'" aria-selected="'+(tab===x[0])+'">'+x[1]+'</button>'}).join("");
+}
+function tradesView(){
+  var h=(S.focus?'<div class="goal"><b>This week\'s focus:</b> '+esc(S.focus)+'</div>':'')+'<div class="panel"><h2>Plan a trade</h2><div class="row"><div><label for="coin">Coin</label><input id="coin" placeholder="Name or ticker"></div><div><label for="size">Position size ($)</label><input id="size" type="number" step="any" min="0"></div></div>'+
+  '<label for="ca">Contract address (optional, used in your Telegram post)</label><input id="ca">'+
+  '<label for="why">Why am I buying?</label><textarea id="why"></textarea>'+
+  '<div class="row"><div><label for="stop">I\'m wrong and exit if… (required)</label><input id="stop" placeholder="e.g. drops 30%"></div><div><label for="tp">Take-profit plan (required)</label><input id="tp" placeholder="e.g. sell half at 2x"></div></div>'+
+  '<label for="emo">How do I feel right now? (required)</label><select id="emo"><option value="">Choose one</option><option>Calm</option><option>Confident</option><option>FOMO</option><option>Revenge</option><option>Bored</option><option>Anxious</option></select>'+
+  '<label>60-second vetting</label><div class="checks">'+CHECKS.map(function(c,i){return'<label><input type="checkbox" class="ck" value="'+i+'"> '+c+'</label>'}).join("")+'</div>'+
+  '<button class="btn" id="addT">Save plan</button></div>';
+  var L=S.trades.slice().reverse();
+  h+='<div class="panel"><h2>Trade log</h2>'+(L.length?L.map(tradeItem).join(""):'<div class="empty">No trades yet. Plan your first one above.</div>')+'</div>';
+  return h;
+}
+function tradeItem(t){
+  var o=t.status==="open",v=(t.checks||[]).length;
+  var h='<div class="item"><div class="head"><strong>'+esc(t.coin)+'</strong><span>'+(o?'<span class="tag">Open</span>':'<span class="'+(t.pnl>=0?"gain":"loss")+' num">'+(t.pnl>=0?"+":"")+money(t.pnl)+'</span>')+'</span></div>'+
+   '<div class="meta">'+esc(t.date)+' · '+money(t.size)+' · vetting '+v+'/'+CHECKS.length+(t.emo?' · felt '+esc(t.emo):'')+(o?"":' · '+(t.followed?"followed plan":"broke plan"))+'</div>'+
+   (t.ca?'<div class="meta" style="word-break:break-all">CA: '+esc(t.ca)+'</div>':'')+'<p>'+esc(t.why)+'</p><div class="meta">Exit if: '+esc(t.stop||"not set")+' · Take profit: '+esc(t.tp||"not set")+'</div>';
+  if(!o){var pg=t.peak!=null?t.peak-t.size:null;
+    if(pg!=null&&pg>0)h+='<p class="meta">Peaked at +'+money(pg)+(pg>t.pnl?', gave back '+money(pg-t.pnl):', sold near the top')+'</p>';
+    if((t.mistakes||[]).length)h+='<p class="meta">Mistakes: '+esc(t.mistakes.join(", "))+'</p>';
+    if(t.lesson)h+='<p><b>Lesson:</b> '+esc(t.lesson)+'</p>';}
+  if(o)h+='<div class="row" style="margin-top:8px"><div><label for="pk'+t.id+'">Highest value it reached ($)'+(t.peak!=null?' (saved: '+money(t.peak)+')':'')+'</label><input id="pk'+t.id+'" type="number" step="any"></div><div><button class="ghost" data-peak="'+t.id+'" style="margin-top:28px">Save peak</button></div></div>';
+  if(o)h+='<div class="actions"><div class="row" style="width:100%"><div><label for="pnl'+t.id+'">Result ($, use minus for a loss)</label><input id="pnl'+t.id+'" type="number" step="any"></div><div><label for="fl'+t.id+'">Did I follow my plan?</label><select id="fl'+t.id+'"><option value="1">Yes</option><option value="0">No</option></select></div></div>'+
+   '<div style="width:100%"><label for="ls'+t.id+'">What would I change?</label><textarea id="ls'+t.id+'"></textarea></div><div style="width:100%"><label>Mistakes I made</label><div class="checks">'+MIST.map(function(m){return'<label><input type="checkbox" class="mk'+t.id+'" value="'+m+'"> '+m+'</label>'}).join("")+'</div></div><button class="btn" data-close="'+t.id+'">Close trade</button></div>';
+  h+='<div class="actions"><button class="ghost" data-tg="'+t.id+'">Copy Telegram post</button><button class="ghost" data-del="trades:'+t.id+'">Delete</button></div></div>';
+  return h;
+}
+function missedView(){
+  var h='<div class="panel"><h2>Log a play I skipped</h2><p class="sub">Write what you saw at the time, then what a quick check would have shown.</p>'+
+  '<label for="mc">Coin</label><input id="mc">'+
+  '<label for="mx">How far did it run?</label><input id="mx" placeholder="e.g. 10x">'+
+  '<label for="ms">What I saw, and why I passed</label><textarea id="ms"></textarea>'+
+  '<label for="mw">What a quick check would have shown</label><textarea id="mw"></textarea>'+
+  '<label for="mv">Verdict</label><select id="mv"><option>Real setup I should have caught</option><option>Looked good only in hindsight</option><option>Correct pass (it was a risk)</option></select>'+
+  '<button class="btn" id="addM">Save entry</button></div>';
+  var L=S.missed.slice().reverse();
+  h+='<div class="panel"><h2>Missed plays</h2>'+(L.length?L.map(function(m){return'<div class="item"><div class="head"><strong>'+esc(m.coin)+'</strong><span class="tag">'+esc(m.run||"")+'</span></div><div class="meta">'+esc(m.date)+' · '+esc(m.verdict)+'</div><p><b>Saw:</b> '+esc(m.saw)+'</p><p><b>Check would show:</b> '+esc(m.check)+'</p><div class="actions"><button class="ghost" data-del="missed:'+m.id+'">Delete</button></div></div>'}).join(""):'<div class="empty">Nothing logged. After a few weeks this shows whether you miss real setups or just feel FOMO.</div>')+'</div>';
+  var real=S.missed.filter(function(m){return m.verdict.indexOf("Real")===0}).length;
+  if(S.missed.length)h+='<p class="meta">'+real+' of '+S.missed.length+' logged plays were marked real setups you could have caught.</p>';
+  return h;
+}
+function notesView(){
+  var h='<div class="panel"><h2>Daily brain dump</h2><p class="sub">Hot narratives, what confused you, patterns you noticed, how you felt.</p><textarea id="nt" style="min-height:110px"></textarea><button class="btn" id="addN">Save note</button></div>';
+  var L=S.notes.slice().reverse();
+  h+='<div class="panel"><h2>Notes</h2>'+(L.length?L.map(function(n){return'<div class="item"><div class="meta">'+esc(n.date)+'</div><p style="white-space:pre-wrap">'+esc(n.text)+'</p><div class="actions"><button class="ghost" data-del="notes:'+n.id+'">Delete</button></div></div>'}).join(""):'<div class="empty">No notes yet.</div>')+'</div>';
+  h+='<div class="panel"><h2>Settings</h2><div class="row"><div><label for="st">Starting balance ($)</label><input id="st" type="number" step="any" value="'+S.start+'"></div><div><label for="gl">Goal ($)</label><input id="gl" type="number" step="any" value="'+S.goal+'"></div></div><button class="btn" id="addS">Update</button></div>';
+  return h;
+}
+var range="week";
+function bucket(t){var h=new Date(t.id).getHours();return h<6?"Late night (12-6am)":h<12?"Morning (6am-12pm)":h<18?"Afternoon (12-6pm)":"Evening (6pm-12am)"}
+function grp(list,fn){var g={};list.forEach(function(t){fn(t).forEach(function(k){(g[k]=g[k]||[]).push(t)})});return g}
+function sum(a){return a.reduce(function(x,t){return x+t.pnl},0)}
+function worstOf(g){var w=null;Object.keys(g).forEach(function(k){var a=g[k],p=sum(a);if(a.length>=2&&p<0&&(!w||p<w.p))w={k:k,n:a.length,p:p}});return w}
+function findings(c){
+  var o=[],wn=c.filter(function(t){return t.pnl>0}),ls=c.filter(function(t){return t.pnl<0});
+  if(c.length<5)o.push("Only "+c.length+" closed trade"+(c.length===1?"":"s")+" in this range. Patterns get reliable around 10 or more, so treat what follows as hints, not rules.");
+  var aw=wn.length?sum(wn)/wn.length:0,al=ls.length?sum(ls)/ls.length:0;
+  if(wn.length&&ls.length&&Math.abs(al)>aw)o.push("Your average loss ("+money(al)+") is bigger than your average win (+"+money(aw)+"). Exit at your stated stop and take partial profit earlier.");
+  var bp=c.filter(function(t){return!t.followed}),fp=c.filter(function(t){return t.followed});
+  if(bp.length)o.push("You broke your plan on "+bp.length+" of "+c.length+" trades. Those netted "+money(sum(bp))+(fp.length?", versus "+money(sum(fp))+" when you followed it.":"."));
+  var we=worstOf(grp(c,function(t){return t.emo?[t.emo]:[]}));
+  if(we)o.push("Entries while feeling "+we.k+" lost "+money(-we.p)+" over "+we.n+" trades. Consider a rule: no entries when you feel "+we.k+".");
+  var wt=worstOf(grp(c,function(t){return[bucket(t)]}));
+  if(wt)o.push("Your weakest window is "+wt.k+": "+money(wt.p)+" over "+wt.n+" trades. Trade less then, or not at all.");
+  var wm=worstOf(grp(c,function(t){return t.mistakes||[]}));
+  if(wm)o.push("Your costliest mistake is "+wm.k+": "+wm.n+" times, "+money(wm.p)+" total.");
+  var gb=c.reduce(function(a,t){return a+(t.peak!=null&&t.peak-t.size>t.pnl?t.peak-t.size-t.pnl:0)},0);
+  if(gb>0)o.push("You gave back "+money(gb)+" of profit after it peaked. Try a fixed rule such as selling half at 2x.");
+  var iv=c.filter(function(t){return(t.checks||[]).length<CHECKS.length});
+  if(iv.length)o.push(iv.length+" trades had incomplete vetting and netted "+money(sum(iv))+".");
+  if(o.length===(c.length<5?1:0))o.push("Nothing stands out as a problem in this range. Keep following your plan and keep logging.");
+  return o}
+function tbl(title,g){var ks=Object.keys(g);if(!ks.length)return"";
+  var rows=ks.map(function(k){var a=g[k];return{k:k,n:a.length,w:Math.round(a.filter(function(t){return t.pnl>0}).length/a.length*100),p:sum(a)}}).sort(function(a,b){return a.p-b.p});
+  return'<div class="panel"><h2>'+title+'</h2><div style="overflow-x:auto"><table><tr><th>Group</th><th>Trades</th><th>Win rate</th><th>Net P/L</th></tr>'+rows.map(function(r){return'<tr><td>'+esc(r.k)+'</td><td class="num">'+r.n+'</td><td class="num">'+r.w+'%</td><td class="num '+(r.p>=0?"gain":"loss")+'">'+money(r.p)+'</td></tr>'}).join("")+'</table></div></div>'}
+function reviewView(){
+  var all=closed(),c=range==="week"?all.filter(function(t){return(t.closedAt||t.id)>=Date.now()-6048e5}):all;
+  var h='<div class="panel"><h2>Review</h2><div class="actions"><button class="ghost" data-range="week" aria-pressed="'+(range==="week")+'">Last 7 days</button><button class="ghost" data-range="all" aria-pressed="'+(range==="all")+'">All time</button></div>';
+  if(!c.length)return h+'<div class="empty">No closed trades in this range yet.</div></div>';
+  var net=sum(c),w=c.filter(function(t){return t.pnl>0}).length;
+  h+='<p style="margin:12px 0 0"><b class="num '+(net>=0?"gain":"loss")+'">'+money(net)+'</b> across '+c.length+' trades. Win rate '+Math.round(w/c.length*100)+'%. Average per trade '+money(net/c.length)+'.</p></div>';
+  h+='<div class="panel"><h2>What to work on</h2><ul style="margin:0;padding-left:18px">'+findings(c).map(function(f){return'<li style="margin:6px 0">'+esc(f)+'</li>'}).join("")+'</ul></div>';
+  h+=tbl("By feeling at entry",grp(c,function(t){return t.emo?[t.emo]:[]}));
+  h+=tbl("By mistake",grp(c,function(t){return t.mistakes||[]}));
+  h+=tbl("By time of day",grp(c,function(t){return[bucket(t)]}));
+  h+=tbl("Plan and vetting",grp(c,function(t){return[t.followed?"Followed plan":"Broke plan",(t.checks||[]).length===CHECKS.length?"Full vetting":"Incomplete vetting"]}));
+  h+='<div class="panel"><h2>Next week</h2><label for="fc">The one thing I will change</label><input id="fc" value="'+esc(S.focus||"")+'"><button class="btn" id="addF">Save focus</button></div>';
+  return h}
+function post(t){var o=t.status==="open",L=[(o?"🟢 ENTRY":(t.pnl>=0?"✅ CLOSED":"🔻 CLOSED"))+" - "+t.coin];
+  if(t.ca)L.push("CA: "+t.ca);L.push("Size: "+money(t.size));if(t.why)L.push("Thesis: "+t.why);if(t.stop)L.push("Exit if: "+t.stop);if(t.tp)L.push("Plan: "+t.tp);
+  L.push("Vetting: "+(t.checks||[]).length+"/"+CHECKS.length);
+  if(!o){L.push("Result: "+(t.pnl>=0?"+":"")+money(t.pnl)+" ("+(t.size?Math.round(t.pnl/t.size*100):0)+"%)");if(t.lesson)L.push("Lesson: "+t.lesson)}
+  L.push("Not financial advice. DYOR.");return L.join("\n")}
+function render(){stats();tabs();$("view").innerHTML=tab==="trades"?tradesView():tab==="missed"?missedView():tab==="review"?reviewView():notesView();}
+function id(){return Date.now()+Math.floor(Math.random()*1000)}
+document.addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.t){tab=b.dataset.t;render();return}
+  if(b.dataset.del){var p=b.dataset.del.split(":");if(confirm("Delete this entry?")){S[p[0]]=S[p[0]].filter(function(x){return String(x.id)!==p[1]});save();render()}return}
+  if(b.dataset.peak){var i2=b.dataset.peak,pv=parseFloat($("pk"+i2).value);if(isNaN(pv))return;S.trades.forEach(function(t){if(String(t.id)===i2)t.peak=Math.max(pv,t.peak||0)});save();render();return}
+  if(b.dataset.tg){var tt=S.trades.filter(function(t){return String(t.id)===b.dataset.tg})[0],tx=post(tt);try{navigator.clipboard.writeText(tx).then(function(){alert("Copied. Paste it into Telegram.")},function(){prompt("Copy this post:",tx)})}catch(e){prompt("Copy this post:",tx)}return}
+  if(b.dataset.range){range=b.dataset.range;render();return}
+  if(b.dataset.close){var i=b.dataset.close,v=parseFloat($("pnl"+i).value);if(isNaN(v)){alert("Enter the result in dollars.");return}
+    S.trades.forEach(function(t){if(String(t.id)===i){t.status="closed";t.closedAt=Date.now();t.pnl=v;t.followed=$("fl"+i).value==="1";t.lesson=$("ls"+i).value;t.mistakes=[].slice.call(document.querySelectorAll(".mk"+i+":checked")).map(function(x){return x.value})}});save();render();return}
+  if(b.id==="addT"){var c=$("coin").value.trim(),s=parseFloat($("size").value),w=$("why").value.trim();
+    if(!c||isNaN(s)||!w){alert("Add a coin, a size, and your reason for buying first.");return}
+    if(!$("stop").value.trim()||!$("tp").value.trim()){alert("Set your exit and your take-profit plan before you buy.");return}
+    if(!$("emo").value){alert("Pick how you feel right now.");return}
+    var ck=document.querySelectorAll(".ck:checked").length,bal=balance();
+    if(ck<CHECKS.length&&!confirm("Vetting is incomplete ("+ck+"/"+CHECKS.length+"). Enter anyway? It will show up in your review."))return;
+    if(bal>0&&s>bal*0.5&&!confirm("This trade is "+Math.round(s/bal*100)+"% of your balance. Continue?"))return;
+    S.trades.push({id:id(),date:today(),coin:c,size:s,why:w,ca:$("ca").value.trim(),stop:$("stop").value,tp:$("tp").value,checks:[].slice.call(document.querySelectorAll(".ck:checked")).map(function(x){return x.value}),emo:$("emo").value,status:"open"});save();render()}
+  if(b.id==="addM"){var m=$("mc").value.trim();if(!m){alert("Add the coin name.");return}
+    S.missed.push({id:id(),date:today(),coin:m,run:$("mx").value,saw:$("ms").value,check:$("mw").value,verdict:$("mv").value});save();render()}
+  if(b.id==="addF"){S.focus=$("fc").value.trim();save();render()}
+  if(b.id==="addN"){var n=$("nt").value.trim();if(!n)return;S.notes.push({id:id(),date:new Date().toLocaleString(),text:n});save();render()}
+  if(b.id==="addS"){var a=parseFloat($("st").value),g=parseFloat($("gl").value);if(a>0)S.start=a;if(g>0)S.goal=g;save();render()}
+});
+$("exp").onclick=function(){var t=JSON.stringify(S,null,1);try{navigator.clipboard.writeText(t).then(function(){alert("Backup copied. Paste it into a note or a Telegram Saved Messages chat.")},function(){prompt("Copy this backup:",t)})}catch(e){prompt("Copy this backup:",t)}};
+$("imp").onclick=function(){var t=prompt("Paste your backup here:");if(!t)return;try{S=Object.assign({start:40,goal:100000,trades:[],missed:[],notes:[]},JSON.parse(t));save();render()}catch(e){alert("That backup couldn't be read.")}};
+$("theme").onclick=function(){var d=document.documentElement,dark=d.dataset.theme?d.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;d.dataset.theme=dark?"light":"dark"};
+render();
+</script>
+</body>
+</html>
